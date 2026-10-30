@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Voices of Hát Xẩm</title>
+<title>Tiếng vọng Hát Xẩm - Voices of Hát Xẩm</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -12,18 +12,21 @@
 body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .47 0 0 0 0 .2 0 0 0 0 .06 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
 h1,h2,h3{font-family:"Playfair Display",Georgia,serif;font-weight:700;line-height:1.2;margin:0}
 .wrap{max-width:760px;margin:0 auto;padding:20px 18px 60px}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0 18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0 18px;flex-wrap:wrap}
 .brand{font-family:"Playfair Display",Georgia,serif;font-size:1.25rem;color:var(--brown);font-weight:700}
+.top-actions{display:flex;align-items:center;gap:8px}
 nav{display:flex;background:#fff;border:1px solid var(--line);border-radius:99px;padding:3px}
-nav button{border:0;background:none;padding:7px 16px;border-radius:99px;font:inherit;font-size:.9rem;color:var(--muted);cursor:pointer}
+nav button, .lang-btn{border:0;background:none;padding:7px 16px;border-radius:99px;font:inherit;font-size:.9rem;color:var(--muted);cursor:pointer;transition:0.2s}
 nav button.on{background:var(--brown);color:#fff}
+.lang-btn{background:#fff;border:1px solid var(--line);font-weight:600;color:var(--brown)}
+.lang-btn:hover{background:#fbeeea;border-color:var(--red)}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--bronze);outline-offset:2px}
 .bar{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin-bottom:22px}
 .bar i{display:block;height:100%;width:0;background:var(--bronze);transition:width .5s ease}
 .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:30px 26px;box-shadow:0 1px 0 #fff inset,0 12px 30px -18px rgba(120,53,15,.35)}
 .card.q{border-left:6px solid var(--red)}
 .part{color:var(--bronze);font-size:.9rem;margin:0 0 10px}
-.card h2{font-size:1.65rem;margin-bottom:8px}
+.card h2{font-size:1.55rem;margin-bottom:8px}
 .hint{color:var(--muted);font-size:.92rem;margin:0 0 18px}
 .opt{display:block;width:100%;text-align:left;margin:10px 0 0;padding:14px 16px;font:inherit;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}
 .opt:hover{border-color:var(--bronze)}
@@ -56,22 +59,28 @@ blockquote{break-inside:avoid;margin:0 0 12px;padding:12px 14px;background:var(-
 blockquote small{display:block;margin-top:6px;color:var(--muted)}
 .sec{margin:24px 0 8px;font-size:1.25rem}
 .empty{color:var(--muted);font-size:.92rem}
-@media(max-width:620px){.kpis{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.wall{columns:1}.card{padding:24px 18px}.card h2{font-size:1.4rem}}
+@media(max-width:620px){.kpis{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.wall{columns:1}.card{padding:24px 18px}.card h2{font-size:1.35rem}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="brand">Voices of Hát Xẩm</div>
-    <nav><button id="tS" class="on">Survey</button><button id="tD">Community voices</button></nav>
+    <div class="brand" id="brandTitle">Tiếng vọng Hát Xẩm</div>
+    <div class="top-actions">
+      <nav>
+        <button id="tS" class="on">Khảo sát</button>
+        <button id="tD">Cộng đồng</button>
+      </nav>
+      <button id="tLang" class="lang-btn" title="Đổi ngôn ngữ / Switch Language">EN</button>
+    </div>
   </header>
   <main id="app"></main>
 </div>
 <script>
 /* ====== CONFIG ====== */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCIuuLnF3m98ksHuLMWZ9nQQWwwHFD8Ek4tBUn0BcmRqyJcKNmk9VTwb5nmmf9H6lnzw/exec"; // paste your Apps Script Web App URL here (see README). Empty = local demo mode.
-const REFRESH_EVERY = 5;           // auto-refresh after this many new responses
-const CACHE_MIN = 10;              // minutes before the cache is considered stale
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCIuuLnF3m98ksHuLMWZ9nQQWwwHFD8Ek4tBUn0BcmRqyJcKNmk9VTwb5nmmf9H6lnzw/exec";
+const REFRESH_EVERY = 5;
+const CACHE_MIN = 10;
 /* ==================== */
 
 const $ = s => document.querySelector(s), app = $('#app');
@@ -81,46 +90,175 @@ const store = {
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)) }catch(e){} }
 };
 
+let curLang = store.get('xam_lang', 'vi'); // Mặc định tiếng Việt ('vi' hoặc 'en')
+
+const I18N = {
+  vi: {
+    brand: "Tiếng vọng Hát Xẩm",
+    tabSurvey: "Khảo sát",
+    tabDash: "Cộng đồng",
+    next: "Tiếp tục",
+    back: "Quay lại",
+    submit: "Gửi khảo sát",
+    sending: "Đang gửi…",
+    errChoice: "Vui lòng chọn một phương án để tiếp tục.",
+    errText: "Vui lòng nhập câu trả lời để tiếp tục.",
+    errSend: "Không thể lưu câu trả lời của bạn ({msg}). Vui lòng thử lại.",
+    thanksTitleNew: "Cảm ơn bạn đã sẻ chia cảm xúc.",
+    thanksDescNew: "Ý kiến của bạn đã được ghi nhận vào bức tranh chung của cộng đồng.",
+    thanksTitleOld: "Bạn đã tham gia khảo sát rồi.",
+    thanksDescOld: "Mỗi thiết bị chỉ gửi phản hồi một lần.",
+    btnSeeDash: "Xem kết quả cộng đồng",
+    tagError: "Lỗi kết nối: ",
+    tagOffline: "Ngoại tuyến: đang hiển thị dữ liệu lưu gần nhất",
+    tagDemo: "Dữ liệu mẫu. Dữ liệu thật sẽ tự cập nhật khi có phản hồi.",
+    tagLive: "Dữ liệu phản hồi trực tiếp",
+    btnRefresh: "Làm mới dữ liệu",
+    kpiPeople: "Người tham gia",
+    kpiAware: "Biết đến Hát Xẩm",
+    kpiLike: "Yêu thích (trong số người biết đến)",
+    chartAge: "Độ tuổi tham gia",
+    chartAware: "Mức độ biết đến Hát Xẩm",
+    chartFreq: "Tần suất lắng nghe",
+    secWall: "Góc cảm nhận cộng đồng",
+    wallSongs: "Điệu xẩm được yêu thích",
+    wallReasons: "Lý do yêu thích hoặc chưa thích",
+    noData: "Chưa có phản hồi nào.",
+    anon: "Ẩn danh",
+    q1_part: "Phần 1: Thông tin người tham gia",
+    q1_title: "Họ và tên của bạn là gì?",
+    q1_hint: "Tên của bạn chỉ lưu cho ban tổ chức, không hiển thị công khai trên kết quả.",
+    q2_title: "Bạn thuộc nhóm tuổi nào?",
+    q3_part: "Phần 2: Mức độ nhận biết và quan tâm",
+    q3_title: "Bạn đã từng biết hoặc nghe đến nghệ thuật Hát Xẩm chưa?",
+    q4_title: "Bạn có yêu thích nghệ thuật Hát Xẩm không?",
+    q5_title: "Mức độ bạn thường xuyên nghe Hát Xẩm như thế nào?",
+    q6_part: "Phần 3: Cảm nhận cá nhân",
+    q6_title: "Bạn ấn tượng hoặc yêu thích bài xẩm, làn điệu xẩm nào nhất?",
+    q6_hint: "Không bắt buộc. Bạn có thể bỏ qua nếu chưa nhớ ra.",
+    q7_title: "Lý do vì sao bạn yêu thích (hoặc chưa thích) Hát Xẩm?",
+    q7_hint: "Không bắt buộc. Chia sẻ của bạn sẽ được hiển thị ẩn danh trên bảng ý kiến."
+  },
+  en: {
+    brand: "Voices of Hát Xẩm",
+    tabSurvey: "Survey",
+    tabDash: "Community voices",
+    next: "Next",
+    back: "Back",
+    submit: "Submit answers",
+    sending: "Sending…",
+    errChoice: "Please choose one option to continue.",
+    errText: "Please fill in this answer to continue.",
+    errSend: "We could not save your answers ({msg}). Please try again.",
+    thanksTitleNew: "Cảm ơn bạn. Thank you for sharing.",
+    thanksDescNew: "Your answers are now part of the community picture.",
+    thanksTitleOld: "You have already shared your voice.",
+    thanksDescOld: "Each device can submit once.",
+    btnSeeDash: "See community voices",
+    tagError: "Backend error: ",
+    tagOffline: "Offline: showing last saved results",
+    tagDemo: "Sample data. Real answers will replace it.",
+    tagLive: "Live responses",
+    btnRefresh: "Refresh stats",
+    kpiPeople: "People took part",
+    kpiAware: "Have heard of Hát Xẩm",
+    kpiLike: "Like it, among those who have heard of it",
+    chartAge: "Age groups",
+    chartAware: "Awareness of Hát Xẩm",
+    chartFreq: "How often people listen",
+    secWall: "Community voices",
+    wallSongs: "Songs people love",
+    wallReasons: "Why they like it, or not",
+    noData: "No answers yet.",
+    anon: "Anonymous",
+    q1_part: "Part 1: Respondent profile",
+    q1_title: "What is your full name?",
+    q1_hint: "Your name is stored for the organisers only. It never appears on the public results.",
+    q2_title: "What is your age group?",
+    q3_part: "Part 2: Awareness and engagement",
+    q3_title: "Have you ever known or heard of the traditional art of Hát Xẩm?",
+    q4_title: "Do you like Hát Xẩm?",
+    q5_title: "How often do you listen to it?",
+    q6_part: "Part 3: Personal reflections",
+    q6_title: "Which Xẩm song or melody are you most interested in or fond of?",
+    q6_hint: "Optional. Skip it if nothing comes to mind.",
+    q7_title: "What are the reasons why you like or dislike Hát Xẩm?",
+    q7_hint: "Optional. Your words may appear anonymously on the community wall."
+  }
+};
+
 const SEED = [
-  {age:'18 – 24',heard:'Yes, I have',like:'Yes',freq:'Occasionally',song:'Xẩm Thập Ân',reason:'It sounds like stories told by my grandparents. Simple melodies, but they carry a lot of feeling.'},
-  {age:'25 – 34',heard:'Yes, I have',like:'Yes',freq:'Frequently',song:'Xẩm Tàu Điện',reason:'The humour and social commentary still feel fresh. I love that it was street music for ordinary people.'},
+  {age:'18 – 24',heard:'Yes, I have',like:'Yes',freq:'Occasionally',song:'Xẩm Thập Ân',reason:'Giai điệu mộc mạc mà lắng đọng, nghe như câu chuyện ông bà kể ngày xưa.'},
+  {age:'25 – 34',heard:'Yes, I have',like:'Yes',freq:'Frequently',song:'Xẩm Tàu Điện',reason:'Sự hóm hỉnh và tính phản biện xã hội vẫn rất thời sự, gần gũi với đời sống.'},
   {age:'Under 18',heard:'No, never',like:'',freq:'',song:'',reason:''},
-  {age:'35 and above',heard:'Yes, I have',like:'Neutral / Not sure',freq:'Rarely',song:'Xẩm Chợ',reason:'I respect it as heritage, but I rarely find new performances to listen to.'},
-  {age:'18 – 24',heard:'Yes, I have',like:'Yes',freq:'Rarely',song:'Xẩm Mười Hai Bà Mụ',reason:'The nhị fiddle gives me goosebumps. I wish more young people could hear it live.'}
+  {age:'35 and above',heard:'Yes, I have',like:'Neutral / Not sure',freq:'Rarely',song:'Xẩm Chợ',reason:'Rất trân trọng di sản nhưng hiếm có dịp được tiếp cận những buổi diễn trực tiếp.'},
+  {age:'18 – 24',heard:'Yes, I have',like:'Yes',freq:'Rarely',song:'Xẩm Mười Hai Bà Mụ',reason:'Tiếng đàn nhị da diết khiến mình nổi da gà. Rất mong nghệ thuật này được phổ biến hơn.'}
 ];
 
-const heardYes = a => a.heard === 'Yes, I have';
-const Q = [
-  {id:'name', part:'Part 1: Respondent profile', n:1, t:'What is your full name?', type:'text', req:true, hint:'Your name is stored for the organisers only. It never appears on the public results.'},
-  {id:'age', n:2, t:'What is your age group?', type:'choice', opts:['Under 18','18 – 24','25 – 34','35 and above'], req:true},
-  {id:'heard', part:'Part 2: Awareness and engagement', n:3, t:'Have you ever known or heard of the traditional art of Hát Xẩm?', type:'choice', opts:['Yes, I have','No, never'], req:true},
-  {id:'like', n:4, t:'Do you like Hát Xẩm?', type:'choice', opts:['Yes','Neutral / Not sure','No'], req:true, show:heardYes},
-  {id:'freq', n:5, t:'How often do you listen to it?', type:'choice', opts:['Never','Rarely','Occasionally','Frequently'], req:true, show:heardYes},
-  {id:'song', part:'Part 3: Personal reflections', n:6, t:'Which Xẩm song or melody are you most interested in or fond of?', type:'text', hint:'Optional. Skip it if nothing comes to mind.', show:heardYes},
-  {id:'reason', n:7, t:'What are the reasons why you like or dislike Hát Xẩm?', type:'area', hint:'Optional. Your words may appear anonymously on the community wall.', show:heardYes}
+// Định nghĩa câu hỏi: 'val' là giá trị lưu vào Sheet, 'label' là chữ hiển thị theo ngôn ngữ
+const getQuestions = () => [
+  {id:'name', partKey:'q1_part', n:1, tKey:'q1_title', hintKey:'q1_hint', type:'text', req:true},
+  {id:'age', n:2, tKey:'q2_title', type:'choice', req:true, opts:[
+    {val:'Under 18', label:{vi:'Dưới 18 tuổi', en:'Under 18'}},
+    {val:'18 – 24', label:{vi:'18 – 24 tuổi', en:'18 – 24'}},
+    {val:'25 – 34', label:{vi:'25 – 34 tuổi', en:'25 – 34'}},
+    {val:'35 and above', label:{vi:'35 tuổi trở lên', en:'35 and above'}}
+  ]},
+  {id:'heard', partKey:'q3_part', n:3, tKey:'q3_title', type:'choice', req:true, opts:[
+    {val:'Yes, I have', label:{vi:'Đã từng nghe / biết đến', en:'Yes, I have'}},
+    {val:'No, never', label:{vi:'Chưa từng nghe bao giờ', en:'No, never'}}
+  ]},
+  {id:'like', n:4, tKey:'q4_title', type:'choice', req:true, show: a => a.heard === 'Yes, I have', opts:[
+    {val:'Yes', label:{vi:'Có, tôi rất thích', en:'Yes'}},
+    {val:'Neutral / Not sure', label:{vi:'Bình thường / Chưa rõ', en:'Neutral / Not sure'}},
+    {val:'No', label:{vi:'Không thích', en:'No'}}
+  ]},
+  {id:'freq', n:5, tKey:'q5_title', type:'choice', req:true, show: a => a.heard === 'Yes, I have', opts:[
+    {val:'Never', label:{vi:'Không bao giờ', en:'Never'}},
+    {val:'Rarely', label:{vi:'Hiếm khi', en:'Rarely'}},
+    {val:'Occasionally', label:{vi:'Thỉnh thoảng', en:'Occasionally'}},
+    {val:'Frequently', label:{vi:'Thường xuyên', en:'Frequently'}}
+  ]},
+  {id:'song', partKey:'q6_part', n:6, tKey:'q6_title', hintKey:'q6_hint', type:'text', show: a => a.heard === 'Yes, I have'},
+  {id:'reason', n:7, tKey:'q7_title', hintKey:'q7_hint', type:'area', show: a => a.heard === 'Yes, I have'}
 ];
 
 let A = {}, step = 0, view = 'S', charts = [];
-const visible = () => Q.filter(q => !q.show || q.show(A));
-// Last step is judged from the CURRENT answers: Q3 is only last when the answer is "No, never".
-const nextLabel = q => (q.id === 'heard' && !A.heard) ? 'Next' : (step >= visible().length - 1 ? 'Submit answers' : 'Next');
+const visible = () => getQuestions().filter(q => !q.show || q.show(A));
+const nextLabel = q => {
+  const t = I18N[curLang];
+  return (q.id === 'heard' && !A.heard) ? t.next : (step >= visible().length - 1 ? t.submit : t.next);
+};
+
+function updateStaticTexts(){
+  const t = I18N[curLang];
+  $('#brandTitle').textContent = t.brand;
+  $('#tS').textContent = t.tabSurvey;
+  $('#tD').textContent = t.tabDash;
+  $('#tLang').textContent = curLang === 'vi' ? 'EN' : 'VI';
+  document.documentElement.lang = curLang;
+}
 
 /* ---------- SURVEY ---------- */
 function renderSurvey(){
   if(store.get('xam_submitted', false)) return renderThanks(true);
-  const vs = visible(), q = vs[step];
+  const vs = visible(), q = vs[step], t = I18N[curLang];
   const total = A.heard === 'No, never' ? 3 : 7;
+  const partText = q.partKey ? t[q.partKey] : `${curLang==='vi'?'Câu hỏi':'Question'} ${q.n}`;
+  const titleText = `${q.n}. ${t[q.tKey]}`;
+  const hintText = q.hintKey ? t[q.hintKey] : '';
+
   app.innerHTML = `
     <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(step/total*100)}"><i style="width:${Math.round((step+1)/total*100)}%"></i></div>
     <section class="card q slide" key="${q.id}">
-      ${q.part ? `<p class="part">${esc(q.part)}</p>` : `<p class="part">Question ${q.n}</p>`}
-      <h2>${q.n}. ${esc(q.t)}</h2>
-      ${q.hint ? `<p class="hint">${esc(q.hint)}</p>` : '<p class="hint"></p>'}
+      <p class="part">${esc(partText)}</p>
+      <h2>${esc(titleText)}</h2>
+      <p class="hint">${esc(hintText)}</p>
       <div id="inp">${inputHTML(q)}</div>
       <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p class="err" id="err" role="alert"></p>
       <div class="nav">
-        <button class="btn ghost" id="back" ${step===0?'style="visibility:hidden"':''}>Back</button>
+        <button class="btn ghost" id="back" ${step===0?'style="visibility:hidden"':''}>${t.back}</button>
         <button class="btn" id="next">${nextLabel(q)}</button>
       </div>
     </section>`;
@@ -128,12 +266,19 @@ function renderSurvey(){
   $('#back').onclick = () => { step--; renderSurvey(); };
   $('#next').onclick = () => advance(q);
 }
+
 function inputHTML(q){
   const v = A[q.id] || '';
-  if(q.type==='choice') return q.opts.map(o => `<button type="button" class="opt ${v===o?'sel':''}" data-v="${esc(o)}">${esc(o)}</button>`).join('');
+  if(q.type==='choice') {
+    return q.opts.map(o => {
+      const lbl = typeof o.label === 'object' ? o.label[curLang] : o.label;
+      return `<button type="button" class="opt ${v===o.val?'sel':''}" data-v="${esc(o.val)}">${esc(lbl)}</button>`;
+    }).join('');
+  }
   if(q.type==='area') return `<textarea id="f" maxlength="500">${esc(v)}</textarea>`;
   return `<input class="t" id="f" maxlength="200" value="${esc(v)}" autocomplete="off">`;
 }
+
 function bindInput(q){
   if(q.type==='choice'){
     document.querySelectorAll('.opt').forEach(b => b.onclick = () => {
@@ -151,14 +296,21 @@ function bindInput(q){
     if(q.type==='text') f.onkeydown = e => { if(e.key==='Enter') $('#next').click(); };
   }
 }
+
 function advance(q){
-  if(q.req && !String(A[q.id]||'').trim()){ $('#err').textContent = q.type==='choice' ? 'Please choose one option to continue.' : 'Please fill in this answer to continue.'; return; }
-  if(step >= visible().length - 1) return submit();   // recomputed after this answer
+  const t = I18N[curLang];
+  if(q.req && !String(A[q.id]||'').trim()){
+    $('#err').textContent = q.type==='choice' ? t.errChoice : t.errText;
+    return;
+  }
+  if(step >= visible().length - 1) return submit();
   step++; renderSurvey();
 }
+
 async function submit(){
-  if($('#hp').value) return;                       // honeypot: bots only
-  const btn = $('#next'); btn.disabled = true; btn.textContent = 'Sending…';
+  if($('#hp').value) return;
+  const t = I18N[curLang];
+  const btn = $('#next'); btn.disabled = true; btn.textContent = t.sending;
   const rec = {name:(A.name||'').trim(), age:A.age, heard:A.heard, like:A.like||'', freq:A.freq||'', song:(A.song||'').trim(), reason:(A.reason||'').trim()};
   try{
     if(SCRIPT_URL){
@@ -171,16 +323,18 @@ async function submit(){
     store.set('xam_since', store.get('xam_since', 0) + 1);
     renderThanks(false);
   }catch(e){
-    btn.disabled = false; btn.textContent = 'Submit answers';
-    $('#err').textContent = 'We could not save your answers (' + (e.message || 'network error') + '). Please try again.';
+    btn.disabled = false; btn.textContent = t.submit;
+    $('#err').textContent = t.errSend.replace('{msg}', e.message || 'network error');
   }
 }
+
 const stripName = ({name, ...r}) => r;
 function renderThanks(again){
-  app.innerHTML = `<section class="card q slide"><p class="part">${again?'Already submitted':'Answers received'}</p>
-    <h2>${again ? 'You have already shared your voice.' : 'Cảm ơn bạn. Thank you for sharing.'}</h2>
-    <p class="hint" style="margin-top:12px">${again ? 'Each device can submit once.' : 'Your answers are now part of the community picture.'}</p>
-    <div class="nav"><span></span><button class="btn" id="go">See community voices</button></div></section>`;
+  const t = I18N[curLang];
+  app.innerHTML = `<section class="card q slide"><p class="part">${again ? t.thanksTitleOld : t.thanksTitleNew}</p>
+    <h2>${again ? t.thanksTitleOld : t.thanksTitleNew}</h2>
+    <p class="hint" style="margin-top:12px">${again ? t.thanksDescOld : t.thanksDescNew}</p>
+    <div class="nav"><span></span><button class="btn" id="go">${t.btnSeeDash}</button></div></section>`;
   $('#go').onclick = () => setView('D');
 }
 
@@ -198,55 +352,88 @@ async function getRows(force){
   if(SCRIPT_URL && cache) return {rows:cache.rows, ok:true};
   return {rows:SCRIPT_URL ? [] : store.get('xam_local', []), ok:true};
 }
+
 async function renderDash(force){
-  app.innerHTML = '<p class="empty">Loading community voices…</p>';
+  const t = I18N[curLang];
+  app.innerHTML = `<p class="empty">${curLang==='vi'?'Đang tải dữ liệu…':'Loading community voices…'}</p>`;
   const {rows, ok, err} = await getRows(force);
   if(view !== 'D') return;
   const real = rows || [], demo = real.length === 0, data = demo ? SEED : real;
-  const n = data.length, heard = data.filter(heardYes), likeYes = heard.filter(r => r.like === 'Yes').length;
+  const n = data.length, heard = data.filter(r => r.heard === 'Yes, I have'), likeYes = heard.filter(r => r.like === 'Yes').length;
   const pct = (a,b) => b ? Math.round(a/b*100) + '%' : '–';
+
+  let tagStatus = t.tagLive;
+  if(!ok) tagStatus = err ? t.tagError + esc(err) : t.tagOffline;
+  else if(demo) tagStatus = t.tagDemo;
+
   app.innerHTML = `
     <div class="banner">
-      <span class="tag">${!ok ? (err ? 'Backend error: ' + esc(err) : 'Offline: showing last saved results') : (demo ? 'Sample data. Real answers will replace it.' : 'Live responses')}</span>
-      <button class="btn" id="rf">Refresh stats</button>
+      <span class="tag">${tagStatus}</span>
+      <button class="btn" id="rf">${t.btnRefresh}</button>
     </div>
     <div class="kpis">
-      <div class="kpi"><b>${n}</b><span>People took part</span></div>
-      <div class="kpi"><b>${pct(heard.length,n)}</b><span>Have heard of Hát Xẩm</span></div>
-      <div class="kpi"><b>${pct(likeYes,heard.length)}</b><span>Like it, among those who have heard of it</span></div>
+      <div class="kpi"><b>${n}</b><span>${t.kpiPeople}</span></div>
+      <div class="kpi"><b>${pct(heard.length,n)}</b><span>${t.kpiAware}</span></div>
+      <div class="kpi"><b>${pct(likeYes,heard.length)}</b><span>${t.kpiLike}</span></div>
     </div>
     <div class="grid">
-      <div class="box"><h3>Age groups</h3><canvas id="c1" aria-label="Age groups pie chart"></canvas></div>
-      <div class="box"><h3>Awareness of Hát Xẩm</h3><canvas id="c2" aria-label="Awareness pie chart"></canvas></div>
-      <div class="box w"><h3>How often people listen</h3><canvas id="c3" aria-label="Listening frequency bar chart"></canvas></div>
+      <div class="box"><h3>${t.chartAge}</h3><canvas id="c1"></canvas></div>
+      <div class="box"><h3>${t.chartAware}</h3><canvas id="c2"></canvas></div>
+      <div class="box w"><h3>${t.chartFreq}</h3><canvas id="c3"></canvas></div>
     </div>
-    <h2 class="sec">Community voices</h2>
+    <h2 class="sec">${t.secWall}</h2>
     <div class="grid" style="margin-top:0">
-      <div class="box w wall"><h3>Songs people love</h3>${quotes(data,'song')}</div>
-      <div class="box w wall"><h3>Why they like it, or not</h3>${quotes(data,'reason')}</div>
+      <div class="box w wall"><h3>${t.wallSongs}</h3>${quotes(data,'song')}</div>
+      <div class="box w wall"><h3>${t.wallReasons}</h3>${quotes(data,'reason')}</div>
     </div>`;
   $('#rf').onclick = () => renderDash(true);
   charts.forEach(c => c.destroy()); charts = [];
-  const count = (k, labels) => labels.map(l => data.filter(r => r[k] === l).length);
-  const ages = ['Under 18','18 – 24','25 – 34','35 and above'], freqs = ['Never','Rarely','Occasionally','Frequently'];
+
+  const count = (k, vals) => vals.map(v => data.filter(r => r[k] === v).length);
+  const agesVals = ['Under 18','18 – 24','25 – 34','35 and above'];
+  const agesLabels = curLang==='vi' ? ['Dưới 18','18 – 24','25 – 34','35 trở lên'] : agesVals;
+
+  const freqsVals = ['Never','Rarely','Occasionally','Frequently'];
+  const freqsLabels = curLang==='vi' ? ['Không bao giờ','Hiếm khi','Thỉnh thoảng','Thường xuyên'] : freqsVals;
+
+  const awareVals = ['Yes, I have','No, never'];
+  const awareLabels = curLang==='vi' ? ['Đã từng nghe','Chưa từng nghe'] : ['Have heard of it','Never heard of it'];
+
   const pal = ['#78350F','#991B1B','#B45309','#C9A66B'];
   const pie = (id, labels, vals) => charts.push(new Chart($(id), {type:'doughnut', data:{labels, datasets:[{data:vals, backgroundColor:pal, borderColor:'#fff', borderWidth:2}]}, options:{plugins:{legend:{position:'bottom'}}}}));
-  pie('#c1', ages, count('age', ages));
-  pie('#c2', ['Have heard of it','Never heard of it'], count('heard', ['Yes, I have','No, never']));
-  charts.push(new Chart($('#c3'), {type:'bar', data:{labels:freqs, datasets:[{data:count('freq', freqs), backgroundColor:'#B45309', borderRadius:8}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}}));
-}
-function quotes(data, k){
-  const items = data.filter(r => (r[k]||'').trim());
-  if(!items.length) return '<p class="empty">No answers yet.</p>';
-  return items.slice().reverse().map(r => `<blockquote>${esc(r[k])}<small>Anonymous, ${esc(r.age)}</small></blockquote>`).join('');
+
+  pie('#c1', agesLabels, count('age', agesVals));
+  pie('#c2', awareLabels, count('heard', awareVals));
+  charts.push(new Chart($('#c3'), {type:'bar', data:{labels:freqsLabels, datasets:[{data:count('freq', freqsVals), backgroundColor:'#B45309', borderRadius:8}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}}));
 }
 
-/* ---------- VIEW SWITCH ---------- */
+function quotes(data, k){
+  const t = I18N[curLang];
+  const items = data.filter(r => (r[k]||'').trim());
+  if(!items.length) return `<p class="empty">${t.noData}</p>`;
+  return items.slice().reverse().map(r => `<blockquote>${esc(r[k])}<small>${t.anon}, ${esc(r.age)}</small></blockquote>`).join('');
+}
+
+/* ---------- VIEW & LANG SWITCH ---------- */
 function setView(v){
-  view = v; $('#tS').classList.toggle('on', v==='S'); $('#tD').classList.toggle('on', v==='D');
+  view = v;
+  $('#tS').classList.toggle('on', v==='S');
+  $('#tD').classList.toggle('on', v==='D');
   v === 'S' ? renderSurvey() : renderDash(false);
 }
-$('#tS').onclick = () => setView('S'); $('#tD').onclick = () => setView('D');
+
+$('#tS').onclick = () => setView('S');
+$('#tD').onclick = () => setView('D');
+
+$('#tLang').onclick = () => {
+  curLang = curLang === 'vi' ? 'en' : 'vi';
+  store.set('xam_lang', curLang);
+  updateStaticTexts();
+  view === 'S' ? renderSurvey() : renderDash(false);
+};
+
+// Khởi chạy ban đầu
+updateStaticTexts();
 setView('S');
 </script>
 </body>
