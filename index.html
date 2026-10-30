@@ -69,7 +69,7 @@ blockquote small{display:block;margin-top:6px;color:var(--muted)}
 </div>
 <script>
 /* ====== CONFIG ====== */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCIuuLnF3m98ksHuLMWZ9nQQWwwHFD8Ek4tBUn0BcmRqyJcKNmk9VTwb5nmmf9H6lnzw/exec"; // paste your Apps Script Web App URL here (see README). Empty = local demo mode.
+const SCRIPT_URL = ""; // paste your Apps Script Web App URL here (see README). Empty = local demo mode.
 const REFRESH_EVERY = 5;           // auto-refresh after this many new responses
 const CACHE_MIN = 10;              // minutes before the cache is considered stale
 /* ==================== */
@@ -102,11 +102,13 @@ const Q = [
 
 let A = {}, step = 0, view = 'S', charts = [];
 const visible = () => Q.filter(q => !q.show || q.show(A));
+// Last step is judged from the CURRENT answers: Q3 is only last when the answer is "No, never".
+const nextLabel = q => (q.id === 'heard' && !A.heard) ? 'Next' : (step >= visible().length - 1 ? 'Submit answers' : 'Next');
 
 /* ---------- SURVEY ---------- */
 function renderSurvey(){
   if(store.get('xam_submitted', false)) return renderThanks(true);
-  const vs = visible(), q = vs[step], last = step === vs.length - 1;
+  const vs = visible(), q = vs[step];
   const total = A.heard === 'No, never' ? 3 : 7;
   app.innerHTML = `
     <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(step/total*100)}"><i style="width:${Math.round((step+1)/total*100)}%"></i></div>
@@ -119,12 +121,12 @@ function renderSurvey(){
       <p class="err" id="err" role="alert"></p>
       <div class="nav">
         <button class="btn ghost" id="back" ${step===0?'style="visibility:hidden"':''}>Back</button>
-        <button class="btn" id="next">${last ? 'Submit answers' : 'Next'}</button>
+        <button class="btn" id="next">${nextLabel(q)}</button>
       </div>
     </section>`;
   bindInput(q);
   $('#back').onclick = () => { step--; renderSurvey(); };
-  $('#next').onclick = () => advance(q, last);
+  $('#next').onclick = () => advance(q);
 }
 function inputHTML(q){
   const v = A[q.id] || '';
@@ -138,7 +140,10 @@ function bindInput(q){
       A[q.id] = b.dataset.v;
       document.querySelectorAll('.opt').forEach(x => x.classList.toggle('sel', x === b));
       $('#err').textContent = '';
-      if(q.id==='heard'){ ['like','freq','song','reason'].forEach(k => delete A[k]); }
+      if(q.id==='heard'){
+        if(A.heard === 'No, never') ['like','freq','song','reason'].forEach(k => delete A[k]);
+        $('#next').textContent = nextLabel(q);
+      }
     });
   } else {
     const f = $('#f'); f.focus();
@@ -146,9 +151,9 @@ function bindInput(q){
     if(q.type==='text') f.onkeydown = e => { if(e.key==='Enter') $('#next').click(); };
   }
 }
-function advance(q, last){
+function advance(q){
   if(q.req && !String(A[q.id]||'').trim()){ $('#err').textContent = q.type==='choice' ? 'Please choose one option to continue.' : 'Please fill in this answer to continue.'; return; }
-  if(last) return submit();
+  if(step >= visible().length - 1) return submit();   // recomputed after this answer
   step++; renderSurvey();
 }
 async function submit(){
@@ -157,7 +162,9 @@ async function submit(){
   const rec = {name:(A.name||'').trim(), age:A.age, heard:A.heard, like:A.like||'', freq:A.freq||'', song:(A.song||'').trim(), reason:(A.reason||'').trim()};
   try{
     if(SCRIPT_URL){
-      await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(rec)});
+      const r = await fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(rec)});
+      const j = await r.json();
+      if(!j.ok) throw new Error(j.error || 'the server rejected the answers');
     }
     const local = store.get('xam_local', []); local.push(stripName(rec)); store.set('xam_local', local);
     store.set('xam_submitted', true);
@@ -165,7 +172,7 @@ async function submit(){
     renderThanks(false);
   }catch(e){
     btn.disabled = false; btn.textContent = 'Submit answers';
-    $('#err').textContent = 'We could not send your answers. Check your connection and try again.';
+    $('#err').textContent = 'We could not save your answers (' + (e.message || 'network error') + '). Please try again.';
   }
 }
 const stripName = ({name, ...r}) => r;
@@ -184,6 +191,7 @@ async function getRows(force){
   if(SCRIPT_URL && (force || !fresh)){
     try{
       const r = await fetch(SCRIPT_URL + '?t=' + Date.now()); const j = await r.json();
+      if(j.error) return {rows: cache ? cache.rows : [], ok:false, err:j.error};
       if(Array.isArray(j.rows)){ store.set('xam_cache', {t:Date.now(), rows:j.rows}); store.set('xam_since', 0); return {rows:j.rows, ok:true}; }
     }catch(e){ if(cache) return {rows:cache.rows, ok:false}; return {rows:null, ok:false}; }
   }
@@ -192,14 +200,14 @@ async function getRows(force){
 }
 async function renderDash(force){
   app.innerHTML = '<p class="empty">Loading community voices…</p>';
-  const {rows, ok} = await getRows(force);
+  const {rows, ok, err} = await getRows(force);
   if(view !== 'D') return;
   const real = rows || [], demo = real.length === 0, data = demo ? SEED : real;
   const n = data.length, heard = data.filter(heardYes), likeYes = heard.filter(r => r.like === 'Yes').length;
   const pct = (a,b) => b ? Math.round(a/b*100) + '%' : '–';
   app.innerHTML = `
     <div class="banner">
-      <span class="tag">${demo ? 'Sample data. Real answers will replace it.' : (ok ? 'Live responses' : 'Offline: showing last saved results')}</span>
+      <span class="tag">${!ok ? (err ? 'Backend error: ' + esc(err) : 'Offline: showing last saved results') : (demo ? 'Sample data. Real answers will replace it.' : 'Live responses')}</span>
       <button class="btn" id="rf">Refresh stats</button>
     </div>
     <div class="kpis">
