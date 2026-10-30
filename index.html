@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voices of Hát Xẩm</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--paper:#FDFBF7;--ink:#3b2410;--brown:#78350F;--red:#991B1B;--bronze:#B45309;--line:#e7e0d4;--muted:#7a6a58;--r:18px}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .47 0 0 0 0 .2 0 0 0 0 .06 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Playfair Display",Georgia,serif;font-weight:700;line-height:1.2;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding:20px 18px 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0 18px}
+.brand{font-family:"Playfair Display",Georgia,serif;font-size:1.25rem;color:var(--brown);font-weight:700}
+nav{display:flex;background:#fff;border:1px solid var(--line);border-radius:99px;padding:3px}
+nav button{border:0;background:none;padding:7px 16px;border-radius:99px;font:inherit;font-size:.9rem;color:var(--muted);cursor:pointer}
+nav button.on{background:var(--brown);color:#fff}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--bronze);outline-offset:2px}
+.bar{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin-bottom:22px}
+.bar i{display:block;height:100%;width:0;background:var(--bronze);transition:width .5s ease}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:30px 26px;box-shadow:0 1px 0 #fff inset,0 12px 30px -18px rgba(120,53,15,.35)}
+.card.q{border-left:6px solid var(--red)}
+.part{color:var(--bronze);font-size:.9rem;margin:0 0 10px}
+.card h2{font-size:1.65rem;margin-bottom:8px}
+.hint{color:var(--muted);font-size:.92rem;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;margin:10px 0 0;padding:14px 16px;font:inherit;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}
+.opt:hover{border-color:var(--bronze)}
+.opt.sel{border-color:var(--red);background:#fbeeea;transform:scale(1.015)}
+input.t,textarea{width:100%;font:inherit;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;background:var(--paper);margin-top:6px}
+textarea{min-height:130px;resize:vertical}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+.btn{font:inherit;border:0;border-radius:99px;padding:11px 24px;cursor:pointer;background:var(--red);color:#fff;font-weight:600}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:none;color:var(--muted);font-weight:400}
+.slide{animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.slide{animation:none}.opt,.bar i{transition:none}}
+.hp{position:absolute;left:-9999px}
+.err{color:var(--red);font-size:.9rem;min-height:1.3em;margin:10px 0 0}
+.banner{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.tag{background:#fdf0d8;color:var(--bronze);border:1px solid #ecd3a4;border-radius:99px;padding:3px 12px;font-size:.85rem}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi b{display:block;font:700 2rem/1.1 "Playfair Display",Georgia,serif;color:var(--brown)}
+.kpi span{font-size:.85rem;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.box.w{grid-column:1/-1}
+.box h3{font-size:1.05rem;margin-bottom:10px;color:var(--brown)}
+.box canvas{max-height:230px}
+.wall{columns:2;column-gap:12px}
+.wall h3{column-span:all}
+blockquote{break-inside:avoid;margin:0 0 12px;padding:12px 14px;background:var(--paper);border-left:4px solid var(--red);border-radius:4px 12px 12px 4px;font-size:.95rem}
+blockquote small{display:block;margin-top:6px;color:var(--muted)}
+.sec{margin:24px 0 8px;font-size:1.25rem}
+.empty{color:var(--muted);font-size:.92rem}
+@media(max-width:620px){.kpis{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.wall{columns:1}.card{padding:24px 18px}.card h2{font-size:1.4rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Voices of Hát Xẩm</div>
+    <nav><button id="tS" class="on">Survey</button><button id="tD">Community voices</button></nav>
+  </header>
+  <main id="app"></main>
+</div>
+<script>
+/* ====== CONFIG ====== */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCIuuLnF3m98ksHuLMWZ9nQQWwwHFD8Ek4tBUn0BcmRqyJcKNmk9VTwb5nmmf9H6lnzw/exec"; // paste your Apps Script Web App URL here (see README). Empty = local demo mode.
+const REFRESH_EVERY = 5;           // auto-refresh after this many new responses
+const CACHE_MIN = 10;              // minutes before the cache is considered stale
+/* ==================== */
+
+const $ = s => document.querySelector(s), app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k, d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch(e){ return d } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)) }catch(e){} }
+};
+
+const SEED = [
+  {age:'18 – 24',heard:'Yes, I have',like:'Yes',freq:'Occasionally',song:'Xẩm Thập Ân',reason:'It sounds like stories told by my grandparents. Simple melodies, but they carry a lot of feeling.'},
+  {age:'25 – 34',heard:'Yes, I have',like:'Yes',freq:'Frequently',song:'Xẩm Tàu Điện',reason:'The humour and social commentary still feel fresh. I love that it was street music for ordinary people.'},
+  {age:'Under 18',heard:'No, never',like:'',freq:'',song:'',reason:''},
+  {age:'35 and above',heard:'Yes, I have',like:'Neutral / Not sure',freq:'Rarely',song:'Xẩm Chợ',reason:'I respect it as heritage, but I rarely find new performances to listen to.'},
+  {age:'18 – 24',heard:'Yes, I have',like:'Yes',freq:'Rarely',song:'Xẩm Mười Hai Bà Mụ',reason:'The nhị fiddle gives me goosebumps. I wish more young people could hear it live.'}
+];
+
+const heardYes = a => a.heard === 'Yes, I have';
+const Q = [
+  {id:'name', part:'Part 1: Respondent profile', n:1, t:'What is your full name?', type:'text', req:true, hint:'Your name is stored for the organisers only. It never appears on the public results.'},
+  {id:'age', n:2, t:'What is your age group?', type:'choice', opts:['Under 18','18 – 24','25 – 34','35 and above'], req:true},
+  {id:'heard', part:'Part 2: Awareness and engagement', n:3, t:'Have you ever known or heard of the traditional art of Hát Xẩm?', type:'choice', opts:['Yes, I have','No, never'], req:true},
+  {id:'like', n:4, t:'Do you like Hát Xẩm?', type:'choice', opts:['Yes','Neutral / Not sure','No'], req:true, show:heardYes},
+  {id:'freq', n:5, t:'How often do you listen to it?', type:'choice', opts:['Never','Rarely','Occasionally','Frequently'], req:true, show:heardYes},
+  {id:'song', part:'Part 3: Personal reflections', n:6, t:'Which Xẩm song or melody are you most interested in or fond of?', type:'text', hint:'Optional. Skip it if nothing comes to mind.', show:heardYes},
+  {id:'reason', n:7, t:'What are the reasons why you like or dislike Hát Xẩm?', type:'area', hint:'Optional. Your words may appear anonymously on the community wall.', show:heardYes}
+];
+
+let A = {}, step = 0, view = 'S', charts = [];
+const visible = () => Q.filter(q => !q.show || q.show(A));
+
+/* ---------- SURVEY ---------- */
+function renderSurvey(){
+  if(store.get('xam_submitted', false)) return renderThanks(true);
+  const vs = visible(), q = vs[step], last = step === vs.length - 1;
+  const total = A.heard === 'No, never' ? 3 : 7;
+  app.innerHTML = `
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(step/total*100)}"><i style="width:${Math.round((step+1)/total*100)}%"></i></div>
+    <section class="card q slide" key="${q.id}">
+      ${q.part ? `<p class="part">${esc(q.part)}</p>` : `<p class="part">Question ${q.n}</p>`}
+      <h2>${q.n}. ${esc(q.t)}</h2>
+      ${q.hint ? `<p class="hint">${esc(q.hint)}</p>` : '<p class="hint"></p>'}
+      <div id="inp">${inputHTML(q)}</div>
+      <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="err" id="err" role="alert"></p>
+      <div class="nav">
+        <button class="btn ghost" id="back" ${step===0?'style="visibility:hidden"':''}>Back</button>
+        <button class="btn" id="next">${last ? 'Submit answers' : 'Next'}</button>
+      </div>
+    </section>`;
+  bindInput(q);
+  $('#back').onclick = () => { step--; renderSurvey(); };
+  $('#next').onclick = () => advance(q, last);
+}
+function inputHTML(q){
+  const v = A[q.id] || '';
+  if(q.type==='choice') return q.opts.map(o => `<button type="button" class="opt ${v===o?'sel':''}" data-v="${esc(o)}">${esc(o)}</button>`).join('');
+  if(q.type==='area') return `<textarea id="f" maxlength="500">${esc(v)}</textarea>`;
+  return `<input class="t" id="f" maxlength="200" value="${esc(v)}" autocomplete="off">`;
+}
+function bindInput(q){
+  if(q.type==='choice'){
+    document.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      A[q.id] = b.dataset.v;
+      document.querySelectorAll('.opt').forEach(x => x.classList.toggle('sel', x === b));
+      $('#err').textContent = '';
+      if(q.id==='heard'){ ['like','freq','song','reason'].forEach(k => delete A[k]); }
+    });
+  } else {
+    const f = $('#f'); f.focus();
+    f.oninput = () => A[q.id] = f.value;
+    if(q.type==='text') f.onkeydown = e => { if(e.key==='Enter') $('#next').click(); };
+  }
+}
+function advance(q, last){
+  if(q.req && !String(A[q.id]||'').trim()){ $('#err').textContent = q.type==='choice' ? 'Please choose one option to continue.' : 'Please fill in this answer to continue.'; return; }
+  if(last) return submit();
+  step++; renderSurvey();
+}
+async function submit(){
+  if($('#hp').value) return;                       // honeypot: bots only
+  const btn = $('#next'); btn.disabled = true; btn.textContent = 'Sending…';
+  const rec = {name:(A.name||'').trim(), age:A.age, heard:A.heard, like:A.like||'', freq:A.freq||'', song:(A.song||'').trim(), reason:(A.reason||'').trim()};
+  try{
+    if(SCRIPT_URL){
+      await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(rec)});
+    }
+    const local = store.get('xam_local', []); local.push(stripName(rec)); store.set('xam_local', local);
+    store.set('xam_submitted', true);
+    store.set('xam_since', store.get('xam_since', 0) + 1);
+    renderThanks(false);
+  }catch(e){
+    btn.disabled = false; btn.textContent = 'Submit answers';
+    $('#err').textContent = 'We could not send your answers. Check your connection and try again.';
+  }
+}
+const stripName = ({name, ...r}) => r;
+function renderThanks(again){
+  app.innerHTML = `<section class="card q slide"><p class="part">${again?'Already submitted':'Answers received'}</p>
+    <h2>${again ? 'You have already shared your voice.' : 'Cảm ơn bạn. Thank you for sharing.'}</h2>
+    <p class="hint" style="margin-top:12px">${again ? 'Each device can submit once.' : 'Your answers are now part of the community picture.'}</p>
+    <div class="nav"><span></span><button class="btn" id="go">See community voices</button></div></section>`;
+  $('#go').onclick = () => setView('D');
+}
+
+/* ---------- DASHBOARD ---------- */
+async function getRows(force){
+  const cache = store.get('xam_cache', null);
+  const fresh = cache && (Date.now() - cache.t) < CACHE_MIN*60000 && store.get('xam_since', 0) < REFRESH_EVERY;
+  if(SCRIPT_URL && (force || !fresh)){
+    try{
+      const r = await fetch(SCRIPT_URL + '?t=' + Date.now()); const j = await r.json();
+      if(Array.isArray(j.rows)){ store.set('xam_cache', {t:Date.now(), rows:j.rows}); store.set('xam_since', 0); return {rows:j.rows, ok:true}; }
+    }catch(e){ if(cache) return {rows:cache.rows, ok:false}; return {rows:null, ok:false}; }
+  }
+  if(SCRIPT_URL && cache) return {rows:cache.rows, ok:true};
+  return {rows:SCRIPT_URL ? [] : store.get('xam_local', []), ok:true};
+}
+async function renderDash(force){
+  app.innerHTML = '<p class="empty">Loading community voices…</p>';
+  const {rows, ok} = await getRows(force);
+  if(view !== 'D') return;
+  const real = rows || [], demo = real.length === 0, data = demo ? SEED : real;
+  const n = data.length, heard = data.filter(heardYes), likeYes = heard.filter(r => r.like === 'Yes').length;
+  const pct = (a,b) => b ? Math.round(a/b*100) + '%' : '–';
+  app.innerHTML = `
+    <div class="banner">
+      <span class="tag">${demo ? 'Sample data. Real answers will replace it.' : (ok ? 'Live responses' : 'Offline: showing last saved results')}</span>
+      <button class="btn" id="rf">Refresh stats</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>${n}</b><span>People took part</span></div>
+      <div class="kpi"><b>${pct(heard.length,n)}</b><span>Have heard of Hát Xẩm</span></div>
+      <div class="kpi"><b>${pct(likeYes,heard.length)}</b><span>Like it, among those who have heard of it</span></div>
+    </div>
+    <div class="grid">
+      <div class="box"><h3>Age groups</h3><canvas id="c1" aria-label="Age groups pie chart"></canvas></div>
+      <div class="box"><h3>Awareness of Hát Xẩm</h3><canvas id="c2" aria-label="Awareness pie chart"></canvas></div>
+      <div class="box w"><h3>How often people listen</h3><canvas id="c3" aria-label="Listening frequency bar chart"></canvas></div>
+    </div>
+    <h2 class="sec">Community voices</h2>
+    <div class="grid" style="margin-top:0">
+      <div class="box w wall"><h3>Songs people love</h3>${quotes(data,'song')}</div>
+      <div class="box w wall"><h3>Why they like it, or not</h3>${quotes(data,'reason')}</div>
+    </div>`;
+  $('#rf').onclick = () => renderDash(true);
+  charts.forEach(c => c.destroy()); charts = [];
+  const count = (k, labels) => labels.map(l => data.filter(r => r[k] === l).length);
+  const ages = ['Under 18','18 – 24','25 – 34','35 and above'], freqs = ['Never','Rarely','Occasionally','Frequently'];
+  const pal = ['#78350F','#991B1B','#B45309','#C9A66B'];
+  const pie = (id, labels, vals) => charts.push(new Chart($(id), {type:'doughnut', data:{labels, datasets:[{data:vals, backgroundColor:pal, borderColor:'#fff', borderWidth:2}]}, options:{plugins:{legend:{position:'bottom'}}}}));
+  pie('#c1', ages, count('age', ages));
+  pie('#c2', ['Have heard of it','Never heard of it'], count('heard', ['Yes, I have','No, never']));
+  charts.push(new Chart($('#c3'), {type:'bar', data:{labels:freqs, datasets:[{data:count('freq', freqs), backgroundColor:'#B45309', borderRadius:8}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}}));
+}
+function quotes(data, k){
+  const items = data.filter(r => (r[k]||'').trim());
+  if(!items.length) return '<p class="empty">No answers yet.</p>';
+  return items.slice().reverse().map(r => `<blockquote>${esc(r[k])}<small>Anonymous, ${esc(r.age)}</small></blockquote>`).join('');
+}
+
+/* ---------- VIEW SWITCH ---------- */
+function setView(v){
+  view = v; $('#tS').classList.toggle('on', v==='S'); $('#tD').classList.toggle('on', v==='D');
+  v === 'S' ? renderSurvey() : renderDash(false);
+}
+$('#tS').onclick = () => setView('S'); $('#tD').onclick = () => setView('D');
+setView('S');
+</script>
+</body>
+</html>
