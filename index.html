@@ -411,8 +411,21 @@ function quotes(data, k){
   const t = I18N[curLang];
   const items = data.filter(r => (r[k]||'').trim());
   if(!items.length) return `<p class="empty">${t.noData}</p>`;
-  return items.slice().reverse().map(r => `<blockquote>${esc(r[k])}<small>${t.anon}, ${esc(r.age)}</small></blockquote>`).join('');
+  
+  // Ánh xạ độ tuổi theo ngôn ngữ đang chọn
+  const ageMap = {
+    'Under 18': curLang === 'vi' ? 'Dưới 18 tuổi' : 'Under 18',
+    '18 – 24': curLang === 'vi' ? '18 – 24 tuổi' : '18 – 24',
+    '25 – 34': curLang === 'vi' ? '25 – 34 tuổi' : '25 – 34',
+    '35 and above': curLang === 'vi' ? '35 tuổi trở lên' : '35 and above'
+  };
+
+  return items.slice().reverse().map(r => {
+    const ageLabel = ageMap[r.age] || r.age;
+    return `<blockquote>${esc(r[k])}<small>${t.anon}, ${esc(ageLabel)}</small></blockquote>`;
+  }).join('');
 }
+
 
 /* ---------- VIEW & LANG SWITCH ---------- */
 function setView(v){
