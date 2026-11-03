@@ -16,10 +16,12 @@ header{display:flex;justify-content:space-between;align-items:center;gap:12px;pa
 .brand{font-family:"Playfair Display",Georgia,serif;font-size:1.25rem;color:var(--brown);font-weight:700}
 .top-actions{display:flex;align-items:center;gap:8px}
 nav{display:flex;background:#fff;border:1px solid var(--line);border-radius:99px;padding:3px}
-nav button, .lang-btn{border:0;background:none;padding:7px 16px;border-radius:99px;font:inherit;font-size:.9rem;color:var(--muted);cursor:pointer;transition:0.2s}
+nav button, .lang-btn, .qr-btn{border:0;background:none;padding:7px 16px;border-radius:99px;font:inherit;font-size:.9rem;color:var(--muted);cursor:pointer;transition:0.2s}
 nav button.on{background:var(--brown);color:#fff}
-.lang-btn{background:#fff;border:1px solid var(--line);font-weight:600;color:var(--brown)}
-.lang-btn:hover{background:#fbeeea;border-color:var(--red)}
+.lang-btn, .qr-btn{background:#fff;border:1px solid var(--line);font-weight:600;color:var(--brown);display:inline-flex;align-items:center;justify-content:center}
+.qr-btn{padding:7px 12px;gap:6px}
+.qr-btn svg{width:18px;height:18px;fill:currentColor}
+.lang-btn:hover, .qr-btn:hover{background:#fbeeea;border-color:var(--red)}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--bronze);outline-offset:2px}
 .bar{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin-bottom:22px}
 .bar i{display:block;height:100%;width:0;background:var(--bronze);transition:width .5s ease}
@@ -59,6 +61,17 @@ blockquote{break-inside:avoid;margin:0 0 12px;padding:12px 14px;background:var(-
 blockquote small{display:block;margin-top:6px;color:var(--muted)}
 .sec{margin:24px 0 8px;font-size:1.25rem}
 .empty{color:var(--muted);font-size:.92rem}
+
+/* Modal hiển thị QR */
+.qr-modal{display:none;position:fixed;inset:0;background:rgba(59,36,16,0.6);backdrop-filter:blur(3px);z-index:999;align-items:center;justify-content:center;padding:16px}
+.qr-modal.show{display:flex}
+.qr-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:24px;text-align:center;max-width:320px;box-shadow:0 16px 40px rgba(0,0,0,0.25);position:relative;animation:in .2s ease}
+.qr-card img{width:100%;height:auto;aspect-ratio:1/1;border-radius:12px;border:1px solid var(--line);object-fit:cover;display:block}
+.qr-card p{font-size:0.95rem;color:var(--brown);font-weight:600;margin:14px 0 4px}
+.qr-card small{font-size:0.8rem;color:var(--muted);display:block;margin-bottom:14px}
+.qr-card .btn-close{background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:6px 20px;cursor:pointer;font:inherit;font-size:0.85rem;color:var(--brown)}
+.qr-card .btn-close:hover{background:#fbeeea;border-color:var(--red)}
+
 @media(max-width:620px){.kpis{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.wall{columns:1}.card{padding:24px 18px}.card h2{font-size:1.35rem}}
 </style>
 </head>
@@ -71,11 +84,27 @@ blockquote small{display:block;margin-top:6px;color:var(--muted)}
         <button id="tS" class="on">Khảo sát</button>
         <button id="tD">Cộng đồng</button>
       </nav>
+      <!-- Nút xem QR góc trên bên phải -->
+      <button id="btnQR" class="qr-btn" title="Quét mã QR">
+        <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm13-2h3v2h-3v-2zm-5 0h2v3h-2v-3zm3 3h2v2h-2v-2zm-3 2h2v3h-2v-3zm3 1h3v2h-3v-2zm2-3h3v2h-3v-2zM6 6h2v2H6V6zm10 0h2v2h-2V6zM6 16h2v2H6v-2z"/></svg>
+        <span>QR</span>
+      </button>
       <button id="tLang" class="lang-btn" title="Đổi ngôn ngữ / Switch Language">EN</button>
     </div>
   </header>
   <main id="app"></main>
 </div>
+
+<!-- Modal QR Code -->
+<div class="qr-modal" id="qrModal">
+  <div class="qr-card">
+    <img src="qr-code.site.png" alt="QR Code Tiếng vọng Hát Xẩm">
+    <p id="qrTitle">Quét mã để chia sẻ</p>
+    <small id="qrSub">Mời bạn bè cùng lắng nghe & khảo sát</small>
+    <button class="btn-close" id="qrClose">Đóng</button>
+  </div>
+</div>
+
 <script>
 /* ====== CONFIG ====== */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCIuuLnF3m98ksHuLMWZ9nQQWwwHFD8Ek4tBUn0BcmRqyJcKNmk9VTwb5nmmf9H6lnzw/exec";
@@ -90,13 +119,16 @@ const store = {
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)) }catch(e){} }
 };
 
-let curLang = store.get('xam_lang', 'vi'); // Mặc định tiếng Việt ('vi' hoặc 'en')
+let curLang = store.get('xam_lang', 'vi');
 
 const I18N = {
   vi: {
     brand: "Tiếng vọng Hát Xẩm",
     tabSurvey: "Khảo sát",
     tabDash: "Cộng đồng",
+    qrTitle: "Quét mã để chia sẻ",
+    qrSub: "Mời bạn bè cùng tham gia khảo sát",
+    qrClose: "Đóng",
     next: "Tiếp tục",
     back: "Quay lại",
     submit: "Gửi khảo sát",
@@ -143,6 +175,9 @@ const I18N = {
     brand: "Voices of Hát Xẩm",
     tabSurvey: "Survey",
     tabDash: "Community voices",
+    qrTitle: "Scan to share",
+    qrSub: "Invite others to join the survey",
+    qrClose: "Close",
     next: "Next",
     back: "Back",
     submit: "Submit answers",
@@ -195,7 +230,6 @@ const SEED = [
   {age:'18 – 24',heard:'Yes, I have',like:'Yes',freq:'Rarely',song:'Xẩm Mười Hai Bà Mụ',reason:'Tiếng đàn nhị da diết khiến mình nổi da gà. Rất mong nghệ thuật này được phổ biến hơn.'}
 ];
 
-// Định nghĩa câu hỏi: 'val' là giá trị lưu vào Sheet, 'label' là chữ hiển thị theo ngôn ngữ
 const getQuestions = () => [
   {id:'name', partKey:'q1_part', n:1, tKey:'q1_title', hintKey:'q1_hint', type:'text', req:true},
   {id:'age', n:2, tKey:'q2_title', type:'choice', req:true, opts:[
@@ -236,8 +270,16 @@ function updateStaticTexts(){
   $('#tS').textContent = t.tabSurvey;
   $('#tD').textContent = t.tabDash;
   $('#tLang').textContent = curLang === 'vi' ? 'EN' : 'VI';
+  $('#qrTitle').textContent = t.qrTitle;
+  $('#qrSub').textContent = t.qrSub;
+  $('#qrClose').textContent = t.qrClose;
   document.documentElement.lang = curLang;
 }
+
+/* Modal QR Handlers */
+$('#btnQR').onclick = () => $('#qrModal').classList.add('show');
+$('#qrClose').onclick = () => $('#qrModal').classList.remove('show');
+$('#qrModal').onclick = e => { if(e.target === $('#qrModal')) $('#qrModal').classList.remove('show'); };
 
 /* ---------- SURVEY ---------- */
 function renderSurvey(){
@@ -412,7 +454,6 @@ function quotes(data, k){
   const items = data.filter(r => (r[k]||'').trim());
   if(!items.length) return `<p class="empty">${t.noData}</p>`;
   
-  // Ánh xạ độ tuổi theo ngôn ngữ đang chọn
   const ageMap = {
     'Under 18': curLang === 'vi' ? 'Dưới 18 tuổi' : 'Under 18',
     '18 – 24': curLang === 'vi' ? '18 – 24 tuổi' : '18 – 24',
@@ -425,7 +466,6 @@ function quotes(data, k){
     return `<blockquote>${esc(r[k])}<small>${t.anon}, ${esc(ageLabel)}</small></blockquote>`;
   }).join('');
 }
-
 
 /* ---------- VIEW & LANG SWITCH ---------- */
 function setView(v){
